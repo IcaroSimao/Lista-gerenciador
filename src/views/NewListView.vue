@@ -85,21 +85,6 @@ input[type='text'] {
   gap: 10px;
 }
 
-button {
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
 .item-list {
   list-style: none;
   padding: 0;
