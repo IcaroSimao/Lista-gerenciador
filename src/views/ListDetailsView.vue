@@ -1,63 +1,51 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import type { List } from '@/interfaces/list'
+import { ListService } from '@/services/listService'
 
 const route = useRoute()
 const id = route.params.id
-const list = ref({
-  id: id,
-  name: 'Lista de Exemplo',
-  items: [
-    { text: 'Item 1', checked: false },
-    { text: 'Item 2', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 1', checked: false },
-    { text: 'Item 2', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-    { text: 'Item 3', checked: false },
-  ],
-})
+const list = ref({} as List)
+const isLoading = ref(true)
 
 const filterText = ref('')
 
 const filteredItems = computed(() =>
   list.value.items.filter((item) =>
-    item.text.toLowerCase().includes(filterText.value.toLowerCase()),
+    item.name.toLowerCase().includes(filterText.value.toLowerCase()),
   ),
 )
 
 const checkItem = (index: number) => {
   list.value.items[index].checked = !list.value.items[index].checked
 }
+
+const fetchList = async () => {
+  try {
+    list.value = await ListService.getListById(Number(id))
+  } catch (error) {
+    // Adicionar um tratamento de erro mais robusto
+    // Exibir uma mensagem de erro ao usuário ou registrar o erro
+    console.error('Erro ao buscar lista:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(fetchList)
 </script>
 
 <template>
   <div>
     <div style="display: flex; align-items: center; justify-content: space-between">
-      <h1>{{ list.name }}</h1>
+      <h1>{{ list.title }}</h1>
       <div class="filter">
         <input v-model="filterText" type="text" placeholder="Filtrar itens" />
       </div>
     </div>
-
-    <ul style="padding: 0px; max-height: 70vh; overflow: auto">
+    <div v-if="isLoading">Carregando...</div>
+    <ul v-else style="padding: 0px; max-height: 70vh; overflow: auto">
       <li
         v-for="(item, index) in filteredItems"
         :key="index"
@@ -65,7 +53,7 @@ const checkItem = (index: number) => {
         @click="checkItem(index)"
       >
         <div class="item" :class="{ checked: item.checked }" style="display: flex">
-          <span>{{ item.text }}</span>
+          <span>{{ item.name }}</span>
         </div>
       </li>
     </ul>
