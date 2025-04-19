@@ -1,13 +1,28 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import type { List } from '@/interfaces/list'
+import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { ListService } from '../services/listService'
 
 // Exemplo de dados para as listas
-const lists = ref([
-  { id: 1, name: 'Mercado', type: 'SHOP' },
-  { id: 2, name: 'Cronograma', type: 'DAILY' },
-  { id: 3, name: 'Projetos pessoais', type: 'ANY' },
-])
+const lists = ref([] as List[])
+const isLoading = ref(true)
+
+const fetchLists = async () => {
+  try {
+    lists.value = await ListService.getLists()
+  } catch (error) {
+    // Adicionar um tratamento de erro mais robusto
+    // Exibir uma mensagem de erro ao usuário ou registrar o erro
+    console.error('Erro ao buscar listas:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchLists()
+})
 </script>
 
 <template>
@@ -23,8 +38,9 @@ const lists = ref([
         :to="{ name: 'list', params: { id: list.id } }"
         class="grid-item"
       >
-        <h2>{{ list.name }}</h2>
+        <h2>{{ list.title }}</h2>
         <p>Tipo: {{ list.type }}</p>
+        <p>Data: {{ list.createAt }}</p>
       </RouterLink>
     </div>
   </div>
